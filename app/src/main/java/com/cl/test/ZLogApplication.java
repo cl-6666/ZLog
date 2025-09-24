@@ -32,6 +32,7 @@ public class ZLogApplication extends Application {
         initZLog();
     }
 
+
     /**
      * 初始化 ZLog 配置
      * 包含高级配置选项，比原版更好用的功能
