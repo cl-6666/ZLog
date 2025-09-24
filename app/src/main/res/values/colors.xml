@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- 主题颜色 -->
+    <color name="primary_color">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="accent_color">#FF4081</color>
+    
+    <!-- 背景颜色 -->
+    <color name="background_color">#F5F5F5</color>
+    <color name="card_background">#FFFFFF</color>
+    
+    <!-- 文本颜色 -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="log_text">#424242</color>
+    
+    <!-- 按钮颜色 -->
+    <color name="button_primary">#2196F3</color>
+    <color name="button_secondary">#9C27B0</color>
+    <color name="button_success">#4CAF50</color>
+    <color name="button_warning">#FF9800</color>
+    <color name="button_danger">#F44336</color>
+    <color name="button_info">#00BCD4</color>
+    
+    <!-- 其他颜色 -->
+    <color name="divider_color">#E0E0E0</color>
+    <color name="shadow_color">#1A000000</color>
+</resources>

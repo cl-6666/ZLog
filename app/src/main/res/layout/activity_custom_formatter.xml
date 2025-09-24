@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_color">
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/header_background"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← 返回"
+            android:textColor="@android:color/white"
+            android:background="@android:color/transparent"
+            android:textSize="16sp"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="自定义格式化器演示"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v2.0"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:background="@drawable/version_badge"
+            android:padding="4dp" />
+
+    </LinearLayout>
+
+    <!-- 功能按钮区域 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 格式化器演示按钮组 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎨 自定义格式化器演示"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_colorful_json"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="彩色JSON"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_primary"
+                    android:layout_marginEnd="4dp" />
+
+                <Button
+                    android:id="@+id/btn_colorful_xml"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="彩色XML"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_success"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_fancy_border"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="花式边框"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_info"
+                    android:layout_marginEnd="4dp" />
+
+                <Button
+                    android:id="@+id/btn_detailed_thread"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="详细线程"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_warning"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_compact_stacktrace"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="紧凑堆栈"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_danger"
+                    android:layout_marginEnd="4dp" />
+
+                <Button
+                    android:id="@+id/btn_custom_object"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="自定义对象"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/button_secondary"
+                    android:layout_marginStart="4dp" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_clear_logs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="清空日志"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_secondary"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 日志输出区域 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📱 应用内日志输出"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="@drawable/log_output_background">
+
+                <TextView
+                    android:id="@+id/log_output"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="点击上方按钮查看自定义格式化器效果..."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:padding="12dp"
+                    android:textIsSelectable="true" />
+
+            </ScrollView>
+
+            <!-- 提示信息 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/tip_background"
+                android:padding="12dp"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💡"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="自定义格式化器功能演示:\n• 彩色JSON/XML格式化器\n• 花式边框和详细线程信息\n• 紧凑堆栈跟踪格式化\n• 自定义对象格式化器\n• 完整日志请查看Logcat"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="2dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

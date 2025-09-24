@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/background_color">
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="@drawable/header_background"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_log"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ZLog 日志框架演示"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v2.0"
+            android:textSize="12sp"
+            android:textColor="@color/secondary_text"
+            android:background="@drawable/version_badge"
+            android:padding="4dp" />
+
+    </LinearLayout>
+
+    <!-- 功能按钮区域 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="日志功能演示"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text"
+        android:layout_marginBottom="12dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 第一行按钮 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_basic_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="基本日志"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_primary"
+                    android:textColor="@android:color/white" />
+
+                <Button
+                    android:id="@+id/btn_formatted_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="格式化日志"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_primary"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+            <!-- 第二行按钮 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_object_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="对象日志"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_secondary"
+                    android:textColor="@android:color/white" />
+
+                <Button
+                    android:id="@+id/btn_json_xml_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="JSON/XML"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_secondary"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+            <!-- 第三行按钮 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btn_exception_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="异常日志"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_warning"
+                    android:textColor="@android:color/white" />
+
+                <Button
+                    android:id="@+id/btn_custom_tag_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="自定义标签"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_info"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+            <!-- 第四行按钮 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <Button
+                    android:id="@+id/btn_thread_stack_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="线程堆栈"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_success"
+                    android:textColor="@android:color/white" />
+
+                <Button
+                    android:id="@+id/btn_clear_logs"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="清空日志"
+                    android:textSize="14sp"
+                    android:background="@drawable/button_danger"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+            <!-- 第五行按钮 -->
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:orientation="horizontal"
+                 android:layout_marginBottom="8dp">
+
+                 <Button
+                     android:id="@+id/btn_file_log_demo"
+                     android:layout_width="0dp"
+                     android:layout_height="48dp"
+                     android:layout_weight="1"
+                     android:text="📁 文件日志"
+                     android:textSize="14sp"
+                     android:background="@drawable/button_info"
+                     android:textColor="@android:color/white"
+                     android:layout_marginEnd="4dp" />
+
+                 <Button
+                     android:id="@+id/btn_custom_formatter_demo"
+                     android:layout_width="0dp"
+                     android:layout_height="48dp"
+                     android:layout_weight="1"
+                     android:text="🎨 自定义格式化"
+                     android:textSize="14sp"
+                     android:background="@drawable/button_warning"
+                     android:textColor="@android:color/white"
+                     android:layout_marginStart="4dp" />
+
+             </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- 日志输出区域 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="日志输出 (详细信息请查看 Logcat)"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_text"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/log_output_background"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/log_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="点击上方按钮开始演示日志功能..."
+            android:textSize="12sp"
+            android:textColor="@color/log_text"
+            android:fontFamily="monospace"
+            android:lineSpacingExtra="2dp" />
+
+    </ScrollView>
+
+    <!-- 底部提示 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 提示: 完整的日志信息请在 Android Studio 的 Logcat 中查看"
+        android:textSize="12sp"
+        android:textColor="@color/secondary_text"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:background="@drawable/tip_background" />
+
+</LinearLayout>
