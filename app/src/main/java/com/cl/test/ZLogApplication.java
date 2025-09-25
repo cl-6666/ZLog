@@ -30,6 +30,7 @@ public class ZLogApplication extends Application {
     public void onCreate() {
         super.onCreate();
         initZLog();
+
     }
 
 
