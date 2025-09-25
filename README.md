@@ -7,10 +7,10 @@ ZLog 是一个功能强大、灵活易用的 Android/Java 日志框架，支持�
 <div align="center">
 
 ### 主界面
-<img src="img/img_1.png" width="300" alt="ZLog 主界面">
+<img src="img/img_1.png" width="500" alt="ZLog 主界面">
 
 ### 日志输出效果
-<img src="img/img_2.png" width="300" alt="ZLog 日志输出效果">
+<img src="img/img_2.png" width="500" alt="ZLog 日志输出效果">
 
 *更多截图展示了 ZLog 在不同场景下的使用效果，包括基本日志、格式化日志、文件日志等功能。*
 
