@@ -18,12 +18,23 @@ package com.cl.zlog.flattener;
 
 import com.cl.zlog.LogLevel;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Simply join the timestamp, log level, tag and message together.
  *
  * @since 1.3.0
  */
 public class DefaultFlattener implements Flattener, Flattener2 {
+
+  private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+    @Override
+    protected SimpleDateFormat initialValue() {
+      return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+    }
+  };
 
   @Override
   public CharSequence flatten(int logLevel, String tag, String message) {
@@ -32,7 +43,7 @@ public class DefaultFlattener implements Flattener, Flattener2 {
 
   @Override
   public CharSequence flatten(long timeMillis, int logLevel, String tag, String message) {
-    return Long.toString(timeMillis)
+    return DATE_FORMAT.get().format(new Date(timeMillis))
         + '|' + LogLevel.getShortLevelName(logLevel)
         + '|' + tag
         + '|' + message;

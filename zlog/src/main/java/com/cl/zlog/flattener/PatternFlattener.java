@@ -94,7 +94,7 @@ public class PatternFlattener implements Flattener, Flattener2 {
   private static final String PARAMETER_TAG = "t";
   private static final String PARAMETER_MESSAGE = "m";
 
-  static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+  static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
   private String pattern;
 
