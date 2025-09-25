@@ -33,6 +33,10 @@
         <activity
             android:name=".CustomFormatterActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ZLogWrapperDemoActivity"
+            android:exported="false" />
         
     </application>
 

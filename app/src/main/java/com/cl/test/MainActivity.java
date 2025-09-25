@@ -81,6 +81,12 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CustomFormatterActivity.class);
             startActivity(intent);
         });
+
+        // ZLogWrapper 演示
+        findViewById(R.id.btn_zlog_wrapper_demo).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ZLogWrapperDemoActivity.class);
+            startActivity(intent);
+        });
     }
 
     /**

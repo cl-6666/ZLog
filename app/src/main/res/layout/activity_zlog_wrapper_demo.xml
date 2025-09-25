@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#f5f5f5">
+
+    <!-- 标题 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ZLogWrapper 功能演示"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="#ffffff"
+        android:layout_marginBottom="16dp"
+        android:elevation="2dp" />
+
+    <!-- 按钮区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#ffffff"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"
+        android:elevation="2dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="功能演示按钮"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#666666"
+            android:layout_marginBottom="12dp" />
+
+        <!-- 第一行按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btn_basic_logs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="基本日志"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#4CAF50" />
+
+            <Button
+                android:id="@+id/btn_exception_logs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="异常日志"
+                android:textSize="12sp"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#FF9800" />
+
+        </LinearLayout>
+
+        <!-- 第二行按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btn_json_logs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="JSON日志"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#2196F3" />
+
+            <Button
+                android:id="@+id/btn_tag_logs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="标签日志"
+                android:textSize="12sp"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#9C27B0" />
+
+        </LinearLayout>
+
+        <!-- 清空按钮 -->
+        <Button
+            android:id="@+id/btn_clear_logs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="清空日志显示"
+            android:textSize="14sp"
+            android:backgroundTint="#F44336" />
+
+    </LinearLayout>
+
+    <!-- 日志输出区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="#ffffff"
+        android:padding="16dp"
+        android:elevation="2dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="日志输出显示"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#666666"
+            android:layout_marginBottom="12dp" />
+
+        <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#f8f8f8"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/log_output"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="点击上方按钮开始演示 ZLogWrapper 功能...\n\n日志将同时输出到：\n• Android Logcat\n• 控制台 (System.out)\n• 日志文件\n\n文件格式：ZLog-Demo_v版本号_日期.log"
+                android:textSize="12sp"
+                android:textColor="#333333"
+                android:fontFamily="monospace"
+                android:lineSpacingExtra="2dp" />
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</LinearLayout>
