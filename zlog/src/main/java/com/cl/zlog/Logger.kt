@@ -593,7 +593,9 @@ class Logger {
 
         printer.println(
             currentLogLevel, tag, if (logConfiguration.withBorder)
-                logConfiguration.borderFormatter.format(arrayOf(currentThread ?: "", currentStackTrace ?: "", currentMsg))
+                logConfiguration.borderFormatter.format(
+                    listOfNotNull(currentThread, currentStackTrace, currentMsg).toTypedArray()
+                )
             else
                 ((if (currentThread != null) (currentThread + SystemCompat.lineSeparator) else "") +
                         (if (currentStackTrace != null) (currentStackTrace + SystemCompat.lineSeparator) else "") +

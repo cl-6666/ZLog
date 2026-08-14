@@ -20,7 +20,9 @@ import com.cl.zlog.internal.Platform
 import com.cl.zlog.internal.SystemCompat
 import java.io.StringReader
 import java.io.StringWriter
+import javax.xml.XMLConstants
 import javax.xml.transform.OutputKeys
+import javax.xml.transform.TransformerException
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.stream.StreamSource
@@ -36,11 +38,24 @@ class DefaultXmlFormatter : XmlFormatter {
             Platform.get().warn("XML empty.")
             return ""
         }
+
+        if (data.contains("<!DOCTYPE", ignoreCase = true)) {
+            Platform.get().warn("XML DOCTYPE is not supported.")
+            return data
+        }
         
         return try {
             val xmlInput = StreamSource(StringReader(data))
             val xmlOutput = StreamResult(StringWriter())
-            val transformer = TransformerFactory.newInstance().newTransformer()
+            val transformerFactory = TransformerFactory.newInstance().apply {
+                setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
+                disableExternalAccess(this, ACCESS_EXTERNAL_DTD)
+                disableExternalAccess(this, ACCESS_EXTERNAL_STYLESHEET)
+                uriResolver = javax.xml.transform.URIResolver { _, _ ->
+                    throw TransformerException("External XML resources are not supported")
+                }
+            }
+            val transformer = transformerFactory.newTransformer()
             transformer.setOutputProperty(OutputKeys.INDENT, "yes")
             transformer.setOutputProperty(
                 "{http://xml.apache.org/xslt}indent-amount",
@@ -54,7 +69,19 @@ class DefaultXmlFormatter : XmlFormatter {
         }
     }
 
+    private fun disableExternalAccess(factory: TransformerFactory, property: String) {
+        try {
+            factory.setAttribute(property, "")
+        } catch (_: IllegalArgumentException) {
+            // Some Android TransformerFactory implementations do not expose JAXP properties.
+        }
+    }
+
     companion object {
         private const val XML_INDENT = 4
+        private const val ACCESS_EXTERNAL_DTD =
+            "http://javax.xml.XMLConstants/property/accessExternalDTD"
+        private const val ACCESS_EXTERNAL_STYLESHEET =
+            "http://javax.xml.XMLConstants/property/accessExternalStylesheet"
     }
 }

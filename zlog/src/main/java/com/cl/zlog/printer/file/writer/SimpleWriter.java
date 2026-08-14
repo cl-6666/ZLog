@@ -121,9 +121,22 @@ public class SimpleWriter extends Writer {
   }
 
   @Override
+  public void flush() {
+    if (bufferedWriter == null) {
+      return;
+    }
+    try {
+      bufferedWriter.flush();
+    } catch (Exception e) {
+      Platform.get().warn("flush log failed: " + e.getMessage());
+    }
+  }
+
+  @Override
   public boolean close() {
     if (bufferedWriter != null) {
       try {
+        bufferedWriter.flush();
         bufferedWriter.close();
       } catch (Exception e) {
         e.printStackTrace();

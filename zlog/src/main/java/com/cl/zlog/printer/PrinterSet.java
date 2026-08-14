@@ -16,11 +16,15 @@
 
 package com.cl.zlog.printer;
 
+import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
+
 /**
  * Represents a group of Printers that should used to print logs in the same time, each printer
  * may probably print the log to different place.
  */
-public class PrinterSet implements Printer {
+public class PrinterSet implements Printer, Flushable, Closeable {
 
   private Printer[] printers;
 
@@ -30,13 +34,52 @@ public class PrinterSet implements Printer {
    * @param printers the printers used to print the same logs
    */
   public PrinterSet(Printer... printers) {
-    this.printers = printers;
+    this.printers = printers.clone();
   }
 
   @Override
   public void println(int logLevel, String tag, String msg) {
     for (Printer printer : printers) {
       printer.println(logLevel, tag, msg);
+    }
+  }
+
+  @Override
+  public void flush() throws IOException {
+    IOException failure = null;
+    for (Printer printer : printers) {
+      if (printer instanceof Flushable) {
+        try {
+          ((Flushable) printer).flush();
+        } catch (Exception e) {
+          if (failure == null) {
+            failure = new IOException("Flush printer failed", e);
+          }
+        }
+      }
+    }
+    if (failure != null) {
+      throw failure;
+    }
+  }
+
+  @Override
+  public void close() throws IOException {
+    IOException failure = null;
+    for (int i = printers.length - 1; i >= 0; i--) {
+      Printer printer = printers[i];
+      if (printer instanceof Closeable) {
+        try {
+          ((Closeable) printer).close();
+        } catch (Exception e) {
+          if (failure == null) {
+            failure = new IOException("Close printer failed", e);
+          }
+        }
+      }
+    }
+    if (failure != null) {
+      throw failure;
     }
   }
 }

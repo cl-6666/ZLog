@@ -64,6 +64,12 @@ public abstract class Writer {
   public abstract void appendLog(String log);
 
   /**
+   * Flush buffered logs to the underlying destination.
+   */
+  public void flush() {
+  }
+
+  /**
    * Make sure the opened log file is closed, normally called before switching the log file.
    *
    * @return true if the log file is successfully closed, false otherwise

@@ -19,7 +19,7 @@ package com.cl.zlog.printer
 /**
  * Log [Printer] using [android.util.Log].
  */
-class AndroidPrinter @JvmOverloads constructor(
+open class AndroidPrinter @JvmOverloads constructor(
     /**
      * Whether the log should be separated by line separator automatically.
      */
@@ -65,7 +65,7 @@ class AndroidPrinter @JvmOverloads constructor(
      * @param tag      the tag of log
      * @param msg      the msg of log
      */
-    internal fun printChunk(logLevel: Int, tag: String, msg: String) {
+    protected open fun printChunk(logLevel: Int, tag: String, msg: String) {
         android.util.Log.println(logLevel, tag, msg)
     }
 
@@ -80,7 +80,8 @@ class AndroidPrinter @JvmOverloads constructor(
         /**
          * Move the end to the nearest line separator('\n') (if exist).
          */
-        internal fun adjustEnd(msg: String, start: Int, originEnd: Int): Int {
+        @JvmStatic
+        fun adjustEnd(msg: String, start: Int, originEnd: Int): Int {
             if (originEnd == msg.length) {
                 // Already end of message.
                 return originEnd

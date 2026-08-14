@@ -30,6 +30,8 @@ import com.cl.zlog.internal.Platform
 import com.cl.zlog.internal.util.StackTraceUtil
 import com.cl.zlog.printer.Printer
 import com.cl.zlog.printer.PrinterSet
+import java.io.Closeable
+import java.io.Flushable
 
 /**
  * A log tool which can be used in android or java, the most important feature is it can print the
@@ -129,20 +131,24 @@ object ZLog {
     /**
      * Global logger for all direct logging via [ZLog].
      */
+    @Volatile
     private var sLogger: Logger? = null
 
     /**
      * Global log configuration.
      */
     @JvmField
+    @Volatile
     var sLogConfiguration: LogConfiguration? = null
 
     /**
      * Global log printer.
      */
+    @Volatile
     internal var sPrinter: Printer? = null
 
     @JvmField
+    @Volatile
     var sIsInitialized = false
 
     /**
@@ -237,15 +243,51 @@ object ZLog {
      * @since 1.3.0
      */
     @JvmStatic
+    @Synchronized
     fun init(logConfiguration: LogConfiguration, vararg printers: Printer) {
+        val previousPrinter = if (sIsInitialized) sPrinter else null
         if (sIsInitialized) {
             Platform.get().warn("ZLog is already initialized, do not initialize again")
         }
-        sIsInitialized = true
+
+        sIsInitialized = false
+        closePrinter(previousPrinter)
 
         sLogConfiguration = logConfiguration
         sPrinter = PrinterSet(*printers)
-        sLogger = Logger(sLogConfiguration!!, sPrinter!!)
+        sLogger = Logger(logConfiguration, sPrinter!!)
+        sIsInitialized = true
+    }
+
+    /** Flush all printers that support flushing. */
+    @JvmStatic
+    @Synchronized
+    fun flush() {
+        assertInitialization()
+        (sPrinter as? Flushable)?.flush()
+    }
+
+    /** Flush pending logs, release printer resources and reset the global logger. */
+    @JvmStatic
+    @Synchronized
+    fun shutdown() {
+        if (!sIsInitialized) {
+            return
+        }
+        val printer = sPrinter
+        sIsInitialized = false
+        closePrinter(printer)
+    }
+
+    private fun closePrinter(printer: Printer?) {
+        if (printer !is Closeable) {
+            return
+        }
+        try {
+            printer.close()
+        } catch (e: Exception) {
+            Platform.get().error("Close printer failed: ${e.message}")
+        }
     }
 
     /**

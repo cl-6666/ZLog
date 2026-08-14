@@ -20,6 +20,7 @@ import com.cl.zlog.flattener.Flattener
 import com.cl.zlog.flattener.Flattener2
 import com.cl.zlog.internal.DefaultsFactory
 import com.cl.zlog.internal.Platform
+import com.cl.zlog.internal.printer.file.ManagedFileRegistry
 import com.cl.zlog.internal.printer.file.backup.BackupStrategyWrapper
 import com.cl.zlog.internal.printer.file.backup.BackupUtil
 import com.cl.zlog.printer.Printer
@@ -28,21 +29,26 @@ import com.cl.zlog.printer.file.backup.BackupStrategy2
 import com.cl.zlog.printer.file.clean.CleanStrategy
 import com.cl.zlog.printer.file.naming.FileNameGenerator
 import com.cl.zlog.printer.file.writer.Writer
+import java.io.Closeable
 import java.io.File
+import java.io.Flushable
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.CountDownLatch
 
 /**
  * Log [Printer] using file system. When print a log, it will print it to the specified file.
  *
  * Use the [Builder] to construct a [FilePrinter] object.
  */
-class FilePrinter internal constructor(builder: Builder) : Printer {
+class FilePrinter internal constructor(builder: Builder) : Printer, Flushable, Closeable {
 
     /**
      * The folder path of log file.
      */
-    private val folderPath: String
+    private val logFolder: File
+
+    private val managedFileRegistry: ManagedFileRegistry
 
     /**
      * The file name generator for log file.
@@ -69,46 +75,42 @@ class FilePrinter internal constructor(builder: Builder) : Printer {
      */
     private var writer: Writer
 
-    @Volatile
-    private var worker: Worker? = null
+    private val worker: Worker
 
     init {
-        folderPath = builder.folderPath
+        logFolder = File(builder.folderPath).canonicalFile
         fileNameGenerator = builder.fileNameGenerator
         backupStrategy = builder.backupStrategy
         cleanStrategy = builder.cleanStrategy
         flattener = builder.flattener
         writer = builder.writer
-
-        if (USE_WORKER) {
-            worker = Worker()
-        }
-
         checkLogFolder()
+        managedFileRegistry = ManagedFileRegistry(logFolder)
+        worker = Worker(builder.queueCapacity)
     }
 
     /**
      * Make sure the folder of log file exists.
      */
     private fun checkLogFolder() {
-        val folder = File(folderPath)
-        if (!folder.exists()) {
-            folder.mkdirs()
+        if (!logFolder.exists() && !logFolder.mkdirs()) {
+            throw IllegalStateException("Log folder not created: $logFolder")
+        }
+        if (!logFolder.isDirectory) {
+            throw IllegalStateException("Log folder is not a directory: $logFolder")
         }
     }
 
     override fun println(logLevel: Int, tag: String, msg: String) {
-        val timeMillis = System.currentTimeMillis()
-        if (USE_WORKER) {
-            worker?.let { w ->
-                if (!w.isStarted()) {
-                    w.start()
-                }
-                w.enqueue(LogItem(timeMillis, logLevel, tag, msg))
-            }
-        } else {
-            doPrintln(timeMillis, logLevel, tag, msg)
-        }
+        worker.enqueue(LogItem(System.currentTimeMillis(), logLevel, tag, msg))
+    }
+
+    override fun flush() {
+        worker.flush()
+    }
+
+    override fun close() {
+        worker.close()
     }
 
     /**
@@ -118,28 +120,38 @@ class FilePrinter internal constructor(builder: Builder) : Printer {
         val lastFileName = writer.openedFileName
         val isWriterClosed = !writer.isOpened
         if (lastFileName == null || isWriterClosed || fileNameGenerator.isFileNameChangeable) {
-            val newFileName = fileNameGenerator.generateFileName(logLevel, System.currentTimeMillis())
+            val newFileName = fileNameGenerator.generateFileName(logLevel, timeMillis)
             if (newFileName.isNullOrBlank()) {
-                Platform.get().error("File name should not be empty, ignore log: $msg")
+                Platform.get().error("File name should not be empty, ignore file log")
                 return
             }
             if (newFileName != lastFileName || isWriterClosed) {
+                val newLogFile = resolveLogFile(newFileName) ?: return
                 writer.close()
                 cleanLogFilesIfNecessary()
-                if (!writer.open(File(folderPath, newFileName))) {
+                if (!writer.open(newLogFile)) {
                     return
                 }
+                managedFileRegistry.register(newLogFile)
             }
         }
 
-        val lastFile = writer.openedFile
+        val lastFile = writer.openedFile ?: return
         if (backupStrategy.shouldBackup(lastFile)) {
             // Backup the log file, and create a new log file.
+            val loggingFileName = writer.openedFileName ?: lastFile.name
             writer.close()
-            BackupUtil.backup(lastFile, backupStrategy)
-            if (!writer.open(File(folderPath, writer.openedFileName ?: return))) {
+            val backupResult = BackupUtil.backupWithResult(lastFile, backupStrategy)
+            managedFileRegistry.register(backupResult.backupFiles)
+            if (!backupResult.success) {
+                Platform.get().error("Backup log file failed: ${lastFile.name}")
+            }
+            cleanLogFilesIfNecessary()
+            val loggingFile = resolveLogFile(loggingFileName) ?: return
+            if (!writer.open(loggingFile)) {
                 return
             }
+            managedFileRegistry.register(loggingFile)
         }
         val flattenedLog = flattener.flatten(timeMillis, logLevel, tag, msg).toString()
         writer.appendLog(flattenedLog)
@@ -149,12 +161,31 @@ class FilePrinter internal constructor(builder: Builder) : Printer {
      * Clean log files if should clean follow strategy
      */
     private fun cleanLogFilesIfNecessary() {
-        val logDir = File(folderPath)
-        val files = logDir.listFiles() ?: return
-        for (file in files) {
-            if (cleanStrategy.shouldClean(file)) {
-                file.delete()
+        for (file in managedFileRegistry.files()) {
+            if (!file.exists()) {
+                managedFileRegistry.unregister(file)
+            } else if (cleanStrategy.shouldClean(file) && file.delete()) {
+                managedFileRegistry.unregister(file)
             }
+        }
+    }
+
+    private fun resolveLogFile(fileName: String): File? {
+        if (managedFileRegistry.isReserved(fileName)) {
+            Platform.get().error("Reserved log file name: $fileName")
+            return null
+        }
+        return try {
+            val file = File(logFolder, fileName).canonicalFile
+            if (file.parentFile != logFolder) {
+                Platform.get().error("Log file must be inside log folder: $fileName")
+                null
+            } else {
+                file
+            }
+        } catch (e: Exception) {
+            Platform.get().error("Resolve log file failed: ${e.message}")
+            null
         }
     }
 
@@ -192,6 +223,11 @@ class FilePrinter internal constructor(builder: Builder) : Printer {
          * The writer to write log into log file.
          */
         internal var writer: Writer = DefaultsFactory.createWriter()
+
+        /**
+         * Maximum number of pending file logs. Producers apply backpressure when this queue is full.
+         */
+        internal var queueCapacity: Int = DEFAULT_QUEUE_CAPACITY
 
         /**
          * Set the file name generator for log file.
@@ -275,6 +311,15 @@ class FilePrinter internal constructor(builder: Builder) : Printer {
         }
 
         /**
+         * Set the maximum number of logs waiting for file IO.
+         */
+        fun queueCapacity(queueCapacity: Int): Builder {
+            require(queueCapacity > 0) { "Queue capacity should be greater than 0" }
+            this.queueCapacity = queueCapacity
+            return this
+        }
+
+        /**
          * Build configured [FilePrinter] object.
          *
          * @return the built configured [FilePrinter] object
@@ -303,21 +348,31 @@ class FilePrinter internal constructor(builder: Builder) : Printer {
         }
     }
 
+    private sealed interface QueueItem
+
     private data class LogItem(
         val timeMillis: Long,
         val level: Int,
         val tag: String,
         val msg: String
-    )
+    ) : QueueItem
+
+    private data class FlushItem(val completion: CountDownLatch) : QueueItem
+
+    private data object StopItem : QueueItem
 
     /**
      * Work in background, we can enqueue the logs, and the worker will dispatch them.
      */
-    private inner class Worker : Runnable {
+    private inner class Worker(queueCapacity: Int) : Runnable, Flushable, Closeable {
 
-        private val logs: BlockingQueue<LogItem> = LinkedBlockingQueue()
+        private val queue: BlockingQueue<QueueItem> = ArrayBlockingQueue(queueCapacity)
+        private val lifecycleLock = Any()
+        private val terminated = CountDownLatch(1)
 
         @Volatile
+        private var acceptingLogs = true
+
         private var started = false
 
         /**
@@ -326,56 +381,136 @@ class FilePrinter internal constructor(builder: Builder) : Printer {
          * @param log the log to be written to file
          */
         fun enqueue(log: LogItem) {
-            try {
-                logs.put(log)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-        }
-
-        /**
-         * Whether the worker is started.
-         *
-         * @return true if started, false otherwise
-         */
-        fun isStarted(): Boolean {
-            synchronized(this) {
-                return started
-            }
-        }
-
-        /**
-         * Start the worker.
-         */
-        fun start() {
-            synchronized(this) {
-                if (started) {
+            synchronized(lifecycleLock) {
+                if (!acceptingLogs) {
+                    Platform.get().warn("File printer is closed, ignore file log")
                     return
                 }
-                Thread(this).start()
-                started = true
+                startLocked()
+                putUninterruptibly(log)
+            }
+        }
+
+        override fun flush() {
+            var completion: CountDownLatch? = null
+            var waitForTermination = false
+            synchronized(lifecycleLock) {
+                if (!acceptingLogs) {
+                    waitForTermination = true
+                } else if (started) {
+                    completion = CountDownLatch(1)
+                    putUninterruptibly(FlushItem(completion!!))
+                }
+            }
+            if (waitForTermination) {
+                awaitUninterruptibly(terminated)
+            } else {
+                completion?.let(::awaitUninterruptibly)
+            }
+        }
+
+        override fun close() {
+            synchronized(lifecycleLock) {
+                if (acceptingLogs) {
+                    acceptingLogs = false
+                    startLocked()
+                    putUninterruptibly(StopItem)
+                }
+            }
+            awaitUninterruptibly(terminated)
+        }
+
+        private fun startLocked() {
+            if (started) {
+                return
+            }
+            started = true
+            Thread(this, WORKER_THREAD_NAME).apply {
+                isDaemon = true
+                start()
             }
         }
 
         override fun run() {
             try {
                 while (true) {
-                    val log = logs.take()
-                    doPrintln(log.timeMillis, log.level, log.tag, log.msg)
+                    when (val item = queue.take()) {
+                        is LogItem -> printSafely(item)
+                        is FlushItem -> {
+                            try {
+                                writer.flush()
+                            } catch (e: Exception) {
+                                Platform.get().error("Flush file log failed: ${e.message}")
+                            } finally {
+                                item.completion.countDown()
+                            }
+                        }
+                        StopItem -> return
+                    }
                 }
             } catch (e: InterruptedException) {
-                e.printStackTrace()
-                synchronized(this) {
+                Thread.currentThread().interrupt()
+                Platform.get().warn("File log worker interrupted")
+            } finally {
+                try {
+                    writer.close()
+                } catch (e: Exception) {
+                    Platform.get().error("Close file log failed: ${e.message}")
+                }
+                for (item in queue) {
+                    if (item is FlushItem) {
+                        item.completion.countDown()
+                    }
+                }
+                synchronized(lifecycleLock) {
+                    acceptingLogs = false
                     started = false
                 }
+                terminated.countDown()
+            }
+        }
+
+        private fun printSafely(log: LogItem) {
+            try {
+                doPrintln(log.timeMillis, log.level, log.tag, log.msg)
+            } catch (e: Exception) {
+                Platform.get().error("Write file log failed: ${e.message}")
+            }
+        }
+
+        private fun putUninterruptibly(item: QueueItem) {
+            var interrupted = false
+            while (true) {
+                try {
+                    queue.put(item)
+                    break
+                } catch (_: InterruptedException) {
+                    interrupted = true
+                }
+            }
+            if (interrupted) {
+                Thread.currentThread().interrupt()
+            }
+        }
+
+        private fun awaitUninterruptibly(latch: CountDownLatch) {
+            var interrupted = false
+            while (true) {
+                try {
+                    latch.await()
+                    break
+                } catch (_: InterruptedException) {
+                    interrupted = true
+                }
+            }
+            if (interrupted) {
+                Thread.currentThread().interrupt()
             }
         }
     }
 
     companion object {
-        /**
-         * Use worker, write logs asynchronously.
-         */
-        private const val USE_WORKER = true
+        private const val DEFAULT_QUEUE_CAPACITY = 1024
+        private const val WORKER_THREAD_NAME = "ZLog-FilePrinter"
     }
 }

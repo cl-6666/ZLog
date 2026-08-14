@@ -21,44 +21,79 @@ import java.io.File
 
 object BackupUtil {
 
+    internal data class BackupResult(
+        val success: Boolean,
+        val backupFiles: Set<File>
+    )
+
     /**
      * Shift existed backups if needed, and backup the logging file.
      *
      * @param loggingFile    the logging file
      * @param backupStrategy the strategy should be use when backing up
      */
+    @JvmStatic
     fun backup(loggingFile: File, backupStrategy: BackupStrategy2) {
+        backupWithResult(loggingFile, backupStrategy)
+    }
+
+    internal fun backupWithResult(
+        loggingFile: File,
+        backupStrategy: BackupStrategy2
+    ): BackupResult {
         val loggingFileName = loggingFile.name
-        val path = loggingFile.parent
+        val folder = loggingFile.parentFile?.canonicalFile
+            ?: return BackupResult(false, emptySet())
         val maxBackupIndex = backupStrategy.maxBackupIndex
+        val backupFiles = linkedSetOf<File>()
+
+        fun resolveBackupFile(index: Int): File? {
+            val fileName = backupStrategy.getBackupFileName(loggingFileName, index)
+            val file = File(folder, fileName).canonicalFile
+            return file.takeIf { it.parentFile == folder }
+        }
         
         if (maxBackupIndex > 0) {
-            var backupFile = File(path, backupStrategy.getBackupFileName(loggingFileName, maxBackupIndex))
-            if (backupFile.exists()) {
-                backupFile.delete()
+            var backupFile = resolveBackupFile(maxBackupIndex)
+                ?: return BackupResult(false, backupFiles)
+            if (backupFile.exists() && !backupFile.delete()) {
+                return BackupResult(false, backupFiles)
             }
             
             for (i in maxBackupIndex - 1 downTo 1) {
-                backupFile = File(path, backupStrategy.getBackupFileName(loggingFileName, i))
+                backupFile = resolveBackupFile(i) ?: return BackupResult(false, backupFiles)
                 if (backupFile.exists()) {
-                    val nextBackupFile = File(path, backupStrategy.getBackupFileName(loggingFileName, i + 1))
-                    backupFile.renameTo(nextBackupFile)
+                    val nextBackupFile = resolveBackupFile(i + 1)
+                        ?: return BackupResult(false, backupFiles)
+                    if (!backupFile.renameTo(nextBackupFile)) {
+                        return BackupResult(false, backupFiles)
+                    }
+                    backupFiles.add(nextBackupFile)
                 }
             }
             
-            val nextBackupFile = File(path, backupStrategy.getBackupFileName(loggingFileName, 1))
-            loggingFile.renameTo(nextBackupFile)
+            val nextBackupFile = resolveBackupFile(1) ?: return BackupResult(false, backupFiles)
+            if (!loggingFile.renameTo(nextBackupFile)) {
+                return BackupResult(false, backupFiles)
+            }
+            backupFiles.add(nextBackupFile)
         } else if (maxBackupIndex == BackupStrategy2.NO_LIMIT) {
             for (i in 1 until Int.MAX_VALUE) {
-                val nextBackupFile = File(path, backupStrategy.getBackupFileName(loggingFileName, i))
+                val nextBackupFile = resolveBackupFile(i) ?: return BackupResult(false, backupFiles)
                 if (!nextBackupFile.exists()) {
-                    loggingFile.renameTo(nextBackupFile)
-                    break
+                    if (!loggingFile.renameTo(nextBackupFile)) {
+                        return BackupResult(false, backupFiles)
+                    }
+                    backupFiles.add(nextBackupFile)
+                    return BackupResult(true, backupFiles)
                 }
             }
+            return BackupResult(false, backupFiles)
         } else {
             // Illegal maxBackIndex, could not come here.
+            return BackupResult(false, backupFiles)
         }
+        return BackupResult(true, backupFiles)
     }
 
     /**
@@ -66,6 +101,7 @@ object BackupUtil {
      *
      * @param backupStrategy the backup strategy to be verify
      */
+    @JvmStatic
     fun verifyBackupStrategy(backupStrategy: BackupStrategy2) {
         val maxBackupIndex = backupStrategy.maxBackupIndex
         if (maxBackupIndex < 0) {

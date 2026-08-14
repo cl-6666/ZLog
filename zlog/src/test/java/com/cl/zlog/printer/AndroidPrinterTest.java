@@ -40,7 +40,7 @@ public class AndroidPrinterTest {
     ZLogUtil.beforeTest();
     ZLog.init(LogLevel.ALL, new AndroidPrinter() {
       @Override
-      void printChunk(int logLevel, String tag, String msg) {
+      protected void printChunk(int logLevel, String tag, String msg) {
         logContainer.add(new LogItem(logLevel, tag, msg));
       }
     });
