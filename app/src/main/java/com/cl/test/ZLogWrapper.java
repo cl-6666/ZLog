@@ -14,6 +14,7 @@ import com.cl.zlog.ZLog;
 import com.cl.zlog.flattener.PatternFlattener;
 import com.cl.zlog.printer.AndroidPrinter;
 import com.cl.zlog.printer.file.FilePrinter;
+import com.cl.zlog.printer.file.clean.FileLastModifiedCleanStrategy;
 import com.cl.zlog.printer.file.naming.FileNameGenerator;
 
 import java.text.SimpleDateFormat;
@@ -29,7 +30,7 @@ import java.util.TimeZone;
 public class ZLogWrapper {
     private static final String TAG = "ZLog-Demo";
     private static final String FLATTENER = "{d yyyy-MM-dd HH:mm:ss.SSS} {l}/{t}: {m}";
-    private static boolean mHasInit;
+    private static final long LOG_RETENTION_MILLIS = 7L * 24 * 60 * 60 * 1000;
 
     /**
      * 初始化 ZLog
@@ -37,7 +38,11 @@ public class ZLogWrapper {
      * @param application 应用程序上下文
      * @param folderPath  日志文件保存路径，为空则使用默认路径
      */
-    public static void init(Application application, String folderPath) {
+    public static synchronized void init(Application application, String folderPath) {
+        if (isInitialized()) {
+            return;
+        }
+
         // Android 打印器
         AndroidPrinter androidPrinter = new AndroidPrinter(true);
         
@@ -48,7 +53,7 @@ public class ZLogWrapper {
                 .disableStackTrace()
                 .build();
 
-        // 确定日志文件保存路径
+        // 确定日志文件保存路径4
         String path = TextUtils.isEmpty(folderPath) ? 
                 (application.getExternalFilesDir(null) != null ? 
                         application.getExternalFilesDir(null).getPath() : null) : folderPath;
@@ -57,12 +62,12 @@ public class ZLogWrapper {
         // 文件打印器
         FilePrinter filePrinter = new FilePrinter.Builder(path)
                 .fileNameGenerator(new MyFileNameGenerator(application))
+                .cleanStrategy(new FileLastModifiedCleanStrategy(LOG_RETENTION_MILLIS))
                 .flattener(new MyFlattener(FLATTENER))
                 .build();
 
         // 初始化 ZLog
         ZLog.init(config, androidPrinter, filePrinter);
-        mHasInit = true;
         
         // 输出初始化成功信息
         ZLogWrapper.i("INIT", "ZLogWrapper 初始化成功，日志路径: " + path);
@@ -72,8 +77,8 @@ public class ZLogWrapper {
      * VERBOSE 级别日志
      */
     public static void v(String tag, String msg) {
-        if (mHasInit) {
-            ZLog.v("[" + tag + "] " + msg);
+        if (isInitialized()) {
+            ZLog.tag(tag).v(msg);
             return;
         }
         Log.v(tag, msg);
@@ -83,8 +88,8 @@ public class ZLogWrapper {
      * INFO 级别日志
      */
     public static void i(String tag, String msg) {
-        if (mHasInit) {
-            ZLog.i("[" + tag + "] " + msg);
+        if (isInitialized()) {
+            ZLog.tag(tag).i(msg);
             return;
         }
         Log.i(tag, msg);
@@ -94,8 +99,8 @@ public class ZLogWrapper {
      * DEBUG 级别日志
      */
     public static void d(String tag, String msg) {
-        if (mHasInit) {
-            ZLog.d("[" + tag + "] " + msg);
+        if (isInitialized()) {
+            ZLog.tag(tag).d(msg);
             return;
         }
         Log.d(tag, msg);
@@ -105,8 +110,8 @@ public class ZLogWrapper {
      * WARNING 级别日志
      */
     public static void w(String tag, String msg) {
-        if (mHasInit) {
-            ZLog.w("[" + tag + "] " + msg);
+        if (isInitialized()) {
+            ZLog.tag(tag).w(msg);
             return;
         }
         Log.w(tag, msg);
@@ -116,8 +121,8 @@ public class ZLogWrapper {
      * WARNING 级别日志（带异常）
      */
     public static void w(String tag, String msg, Throwable throwable) {
-        if (mHasInit) {
-            ZLog.w("[" + tag + "] " + msg, throwable);
+        if (isInitialized()) {
+            ZLog.tag(tag).w(msg, throwable);
             return;
         }
         Log.w(tag, msg, throwable);
@@ -127,8 +132,8 @@ public class ZLogWrapper {
      * WARNING 级别日志（仅异常）
      */
     public static void w(String tag, Throwable throwable) {
-        if (mHasInit) {
-            ZLog.w("[" + tag + "]", throwable);
+        if (isInitialized()) {
+            ZLog.tag(tag).w("", throwable);
             return;
         }
         Log.w(tag, "", throwable);
@@ -138,8 +143,8 @@ public class ZLogWrapper {
      * ERROR 级别日志
      */
     public static void e(String tag, String msg) {
-        if (mHasInit) {
-            ZLog.e("[" + tag + "] " + msg);
+        if (isInitialized()) {
+            ZLog.tag(tag).e(msg);
             return;
         }
         Log.e(tag, msg);
@@ -149,8 +154,8 @@ public class ZLogWrapper {
      * ERROR 级别日志（带异常）
      */
     public static void e(String tag, String msg, Throwable throwable) {
-        if (mHasInit) {
-            ZLog.e("[" + tag + "] " + msg, throwable);
+        if (isInitialized()) {
+            ZLog.tag(tag).e(msg, throwable);
             return;
         }
         Log.e(tag, msg, throwable);
@@ -160,11 +165,20 @@ public class ZLogWrapper {
      * JSON 格式日志
      */
     public static void json(String tag, String msg) {
-        if (mHasInit) {
-            ZLog.json("[" + tag + "] " + msg);
+        if (isInitialized()) {
+            ZLog.tag(tag).json(msg);
             return;
         }
         Log.d(tag, msg);
+    }
+
+    private static boolean isInitialized() {
+        try {
+            ZLog.assertInitialization();
+            return true;
+        } catch (IllegalStateException ignored) {
+            return false;
+        }
     }
 
     /**
