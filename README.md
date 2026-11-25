@@ -36,7 +36,7 @@ ZLog 是一个功能强大、灵活易用的 Android/Java 日志框架，支持�
 
 ```gradle
 dependencies {
-      implementation 'com.github.cl-6666:ZLog:v2.0.3'
+      implementation 'com.github.cl-6666:ZLog:v2.0.6'
 }
 ```
 
