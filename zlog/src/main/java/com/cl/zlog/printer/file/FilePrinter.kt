@@ -452,21 +452,28 @@ class FilePrinter internal constructor(builder: Builder) : Printer, Flushable, C
                 Thread.currentThread().interrupt()
                 Platform.get().warn("File log worker interrupted")
             } finally {
+                acceptingLogs = false
                 try {
                     writer.close()
                 } catch (e: Exception) {
                     Platform.get().error("Close file log failed: ${e.message}")
-                }
-                for (item in queue) {
-                    if (item is FlushItem) {
-                        item.completion.countDown()
+                } finally {
+                    // Drain first to free any caller holding lifecycleLock while waiting to enqueue.
+                    discardPendingItems()
+                    synchronized(lifecycleLock) {
+                        discardPendingItems()
                     }
+                    terminated.countDown()
                 }
-                synchronized(lifecycleLock) {
-                    acceptingLogs = false
-                    started = false
+            }
+        }
+
+        private fun discardPendingItems() {
+            while (true) {
+                val item = queue.poll() ?: return
+                if (item is FlushItem) {
+                    item.completion.countDown()
                 }
-                terminated.countDown()
             }
         }
 

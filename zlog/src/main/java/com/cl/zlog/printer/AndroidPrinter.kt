@@ -27,6 +27,10 @@ open class AndroidPrinter @JvmOverloads constructor(
     private val maxChunkSize: Int = DEFAULT_MAX_CHUNK_SIZE
 ) : Printer {
 
+    init {
+        require(maxChunkSize > 0) { "Maximum log chunk size must be greater than zero" }
+    }
+
     /**
      * Constructor.
      *
@@ -45,7 +49,7 @@ open class AndroidPrinter @JvmOverloads constructor(
                 start++
                 continue
             }
-            end = minOf(start + maxChunkSize, msgLength)
+            end = start + minOf(maxChunkSize, msgLength - start)
             if (autoSeparate) {
                 val newLine = msg.indexOf('\n', start)
                 end = if (newLine != -1) minOf(end, newLine) else end

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/log_soak_panel_background"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/log_soak_idle"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        android:textColor="?attr/colorPrimary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:labelFor="@id/elapsed_time"
+        android:text="@string/log_soak_elapsed_label"
+        android:textAppearance="?attr/textAppearanceBody2" />
+
+    <TextView
+        android:id="@+id/elapsed_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:text="@string/log_soak_elapsed_zero"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:labelFor="@id/rate"
+        android:text="@string/log_soak_rate"
+        android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+    <Spinner
+        android:id="@+id/rate"
+        android:layout_width="match_parent"
+        android:layout_height="48dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/start_test"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:minHeight="48dp"
+            android:text="@string/log_soak_start" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stop_test"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:minWidth="0dp"
+            android:minHeight="48dp"
+            android:text="@string/log_soak_stop" />
+    </LinearLayout>
+</LinearLayout>

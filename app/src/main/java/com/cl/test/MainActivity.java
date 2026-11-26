@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.cl.test.databinding.ActivityMainBinding;
 import com.cl.zlog.Logger;
 import com.cl.zlog.ZLog;
 
@@ -31,10 +32,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         initViews();
         setupClickListeners();
+        binding.btnLogSoakTest.setOnClickListener(v ->
+                startActivity(new Intent(this, LogSoakActivity.class)));
         
         // 应用启动日志
         ZLog.i("MainActivity 启动完成");

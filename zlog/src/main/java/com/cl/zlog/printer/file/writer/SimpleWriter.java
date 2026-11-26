@@ -134,17 +134,18 @@ public class SimpleWriter extends Writer {
 
   @Override
   public boolean close() {
-    if (bufferedWriter != null) {
-      try {
-        bufferedWriter.flush();
-        bufferedWriter.close();
-      } catch (Exception e) {
-        e.printStackTrace();
+    try (BufferedWriter writer = bufferedWriter) {
+      if (writer != null) {
+        writer.flush();
       }
+      return true;
+    } catch (Exception e) {
+      Platform.get().warn("close log failed: " + e.getMessage());
+      return false;
+    } finally {
+      bufferedWriter = null;
+      logFileName = null;
+      logFile = null;
     }
-    bufferedWriter = null;
-    logFileName = null;
-    logFile = null;
-    return true;
   }
 }

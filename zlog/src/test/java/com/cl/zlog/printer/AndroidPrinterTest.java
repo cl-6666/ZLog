@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class AndroidPrinterTest {
 
@@ -52,6 +53,27 @@ public class AndroidPrinterTest {
     ZLog.d(msg);
     assertEquals(1, logContainer.size());
     AssertUtil.assertHasLog(logContainer, msg);
+  }
+
+  @Test
+  public void testRejectNonPositiveChunkSizes() {
+    assertThrows(IllegalArgumentException.class, () -> new AndroidPrinter(0));
+    assertThrows(IllegalArgumentException.class, () -> new AndroidPrinter(true, -1));
+  }
+
+  @Test
+  public void testVeryLargeChunkSizeAfterLeadingNewline() {
+    AndroidPrinter printer = new AndroidPrinter(Integer.MAX_VALUE) {
+      @Override
+      protected void printChunk(int logLevel, String tag, String msg) {
+        logContainer.add(new LogItem(logLevel, tag, msg));
+      }
+    };
+
+    printer.println(LogLevel.INFO, "tag", "\nfirst\nsecond");
+
+    assertEquals(1, logContainer.size());
+    AssertUtil.assertHasLog(logContainer, "first\nsecond");
   }
 
   @Test

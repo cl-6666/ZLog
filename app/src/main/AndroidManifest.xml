@@ -37,6 +37,11 @@
         <activity
             android:name=".ZLogWrapperDemoActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".LogSoakActivity"
+            android:exported="false"
+            android:label="@string/log_soak_title" />
         
     </application>
 

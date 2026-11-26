@@ -35,4 +35,6 @@
     <!-- 其他颜色 -->
     <color name="divider_color">#E0E0E0</color>
     <color name="shadow_color">#1A000000</color>
+    <color name="log_soak_notice_surface">#FFF1D6</color>
+    <color name="log_soak_notice_text">#693800</color>
 </resources>

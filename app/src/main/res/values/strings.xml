@@ -1,3 +1,40 @@
 <resources>
     <string name="app_name">ZLog</string>
+    <string name="log_soak_title">日志长跑测试</string>
+    <string name="log_soak_shutdown_notice">设备稳定性测试中，请勿关机</string>
+    <string name="log_soak_rate">生成速率</string>
+    <string-array name="log_soak_rates">
+        <item>1 条/秒</item>
+        <item>5 条/秒</item>
+        <item>10 条/秒</item>
+    </string-array>
+    <string name="log_soak_start">开始</string>
+    <string name="log_soak_stop">停止</string>
+    <string name="log_soak_idle">等待开始</string>
+    <string name="log_soak_running">正在运行</string>
+    <string name="log_soak_stopping">正在关闭文件并完成校验</string>
+    <string name="log_soak_passed">校验通过</string>
+    <string name="log_soak_failed">校验未通过</string>
+    <string name="log_soak_stopped_by_user">手动停止</string>
+    <string name="log_soak_page_closed">离开测试页面</string>
+    <string name="log_soak_storage_limit">单处存储的测试文件达到 256 MiB 上限</string>
+    <string name="log_soak_low_space">单处存储的剩余空间不足 128 MiB</string>
+    <string name="log_soak_external_unavailable">外部存储不可写，无法开始双份日志测试</string>
+    <string name="log_soak_error">测试出错</string>
+    <string name="log_soak_error_detail">测试出错（%1$s）</string>
+    <string name="log_soak_result">%1$s · %2$s</string>
+    <string name="log_soak_call_pending">%1$s · 当前日志调用已等待 %2$d ms</string>
+    <string name="log_soak_elapsed_label">运行时长</string>
+    <string name="log_soak_elapsed_zero" translatable="false">00:00</string>
+    <string name="log_soak_submitted_label">已提交</string>
+    <string name="log_soak_verified_label">文件已核对</string>
+    <string name="log_soak_internal">内部</string>
+    <string name="log_soak_external">外部</string>
+    <string name="log_soak_verified_value">%1$s %2$s</string>
+    <string name="log_soak_count" translatable="false">%1$,d</string>
+    <string name="log_soak_latency_value">≤ %1$d µs（估算）</string>
+    <string name="log_soak_metric_unavailable" translatable="false">—</string>
+    <string name="log_soak_metrics">%1$s\n\n%2$s\n\n调用 P99　%3$s</string>
+    <string name="log_soak_storage_metrics">%1$s文件　%7$s\n缺号 %2$d　待核对 %3$d　重复 %4$d　乱序 %5$d　无效 %6$d</string>
+    <string name="log_soak_paths">内部文件\n%1$s\n\n外部文件\n%2$s</string>
 </resources>

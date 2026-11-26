@@ -30,13 +30,16 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
 
-    implementation 'com.github.cl-6666:ZLog:v2.0.6'
+//    implementation 'com.github.cl-6666:ZLog:v2.0.6'
     // ZLog dependency - using local project module
-//    implementation project(':zlog')
+    implementation project(':zlog')
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
